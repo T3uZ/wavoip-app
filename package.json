@@ -1,0 +1,64 @@
+{
+  "name": "wavoip",
+  "version": "1.0.1",
+  "description": "WaVoIP - Chamadas WhatsApp pelo desktop",
+  "type": "module",
+  "main": "main.js",
+  "author": "ICORE",
+  "scripts": {
+    "build": "node build.js",
+    "start": "node build.js && electron .",
+    "dist":    "node build.js && electron-builder --win --publish never",
+    "release": "node build.js && electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "@wavoip/wavoip-api": "^2.4.3",
+    "dotenv": "^17.4.2",
+    "electron-updater": "^6.8.9",
+    "mysql2": "^3.22.5"
+  },
+  "devDependencies": {
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.2",
+    "esbuild": "^0.28.0"
+  },
+  "build": {
+    "appId": "com.icore.wavoip",
+    "productName": "WaVoIP",
+    "copyright": "ICORE",
+    "asar": true,
+    "files": [
+      "main.js",
+      "db.js",
+      "preload.cjs",
+      "renderer/index.html",
+      "renderer/bundle.js",
+      ".env",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "WaVoIP"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "T3uZ",
+      "repo": "wavoip-app",
+      "private": false,
+      "releaseType": "release"
+    }
+  }
+}
