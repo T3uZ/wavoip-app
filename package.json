@@ -1,20 +1,22 @@
 {
   "name": "wavoip",
-  "version": "1.0.1",
-  "description": "WaVoIP - Chamadas WhatsApp pelo desktop",
+  "version": "1.0.4",
+  "description": "IVoIP - Chamadas WhatsApp pelo desktop",
   "type": "module",
   "main": "main.js",
   "author": "ICORE",
   "scripts": {
     "build": "node build.js",
     "start": "node build.js && electron .",
-    "dist":    "node build.js && electron-builder --win --publish never",
+    "dist": "node build.js && electron-builder --win --publish never",
     "release": "node build.js && electron-builder --win --publish always"
   },
   "dependencies": {
     "@wavoip/wavoip-api": "^2.4.3",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "electron-updater": "^6.8.9",
+    "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.22.5"
   },
   "devDependencies": {
@@ -24,7 +26,7 @@
   },
   "build": {
     "appId": "com.icore.wavoip",
-    "productName": "WaVoIP",
+    "productName": "IVoIP",
     "copyright": "ICORE",
     "asar": true,
     "files": [
@@ -33,10 +35,11 @@
       "preload.cjs",
       "renderer/index.html",
       "renderer/bundle.js",
-      ".env",
+      "assets/tray.ico",
       "node_modules/**/*"
     ],
     "win": {
+      "icon": "assets/tray.ico",
       "target": [
         {
           "target": "nsis",
@@ -51,7 +54,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "WaVoIP"
+      "shortcutName": "IVoIP"
     },
     "publish": {
       "provider": "github",
