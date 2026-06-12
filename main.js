@@ -10,6 +10,7 @@ import {
     listarUsuarios, criarUsuario, atualizarUsuario, resetarSenha, deletarUsuario,
     listarTokens, criarToken, atualizarToken, deletarToken,
     tokensPorUsuario, vincularToken, desvincularToken, vinculosDoUsuario,
+    notificarAtendida, verificarAtendida,
     listarContatos, criarContato, atualizarContato, deletarContato,
     listarRegistros, inserirRegistro, finalizarRegistro, estatisticas,
 } from "./db.js"
@@ -191,6 +192,10 @@ function createWindow() {
     ipcMain.handle("admin:vinculos:do-usuario",  (_, token, uid) => { exigirAdmin(token); return vinculosDoUsuario(uid) })
     ipcMain.handle("admin:vinculos:vincular",    (_, token, uid, tid) => { exigirAdmin(token); return vincularToken(uid, tid) })
     ipcMain.handle("admin:vinculos:desvincular", (_, token, uid, tid) => { exigirAdmin(token); return desvincularToken(uid, tid) })
+
+    // ── IPC: Sync multi-device ────────────────────────────────────────────────
+    ipcMain.handle("chamada:notificar", (_, token, phone) => { validarSessao(token); return notificarAtendida(phone) })
+    ipcMain.handle("chamada:verificar", (_, token, phone) => { validarSessao(token); return verificarAtendida(phone) })
 
     // ── IPC: Contatos ─────────────────────────────────────────────────────────
     ipcMain.handle("contatos:listar",    (_, token) => { validarSessao(token); return listarContatos() })

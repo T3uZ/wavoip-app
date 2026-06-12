@@ -1,6 +1,6 @@
 {
   "name": "wavoip",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "IVoIP - Chamadas WhatsApp pelo desktop",
   "type": "module",
   "main": "main.js",

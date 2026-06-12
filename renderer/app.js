@@ -294,6 +294,28 @@ function renderQR(data) {
 }
 
 let activeCall = null, pendingOffer = null, muted = false, callStartTime = null, activeRecordId = null
+let _pollSync = null
+
+function iniciarPollSync(phone) {
+    pararPollSync()
+    _pollSync = setInterval(async () => {
+        try {
+            const atendida = await api.chamadas.verificar(SESSION_TOKEN, phone)
+            if (atendida) {
+                pararPollSync()
+                stopRingtone()
+                pendingOffer = null
+                document.getElementById("incoming-overlay").classList.remove("show")
+                api?.callEnded()
+                log("Atendida em outro dispositivo", "info")
+            }
+        } catch {}
+    }, 1500)
+}
+
+function pararPollSync() {
+    if (_pollSync) { clearInterval(_pollSync); _pollSync = null }
+}
 
 function callDuration() { return callStartTime ? Math.round((Date.now() - callStartTime) / 1000) : 0 }
 
@@ -354,10 +376,11 @@ function iniciarWaVoIP(tokens) {
         document.getElementById("incoming-overlay").classList.add("show")
         startRingtone(); api?.incomingCall()
         log(`Chamada de ${nome ?? phone}`, "info")
+        iniciarPollSync(phone)
 
         offer.on("ended", () => {
             if (pendingOffer !== offer) return
-            stopRingtone(); pendingOffer = null
+            pararPollSync(); stopRingtone(); pendingOffer = null
             document.getElementById("incoming-overlay").classList.remove("show")
             api?.callEnded()
             api?.registros.inserir(SESSION_TOKEN, "perdida", phone, nome !== phone ? nome : null)
@@ -373,6 +396,8 @@ document.getElementById("btn-accept").addEventListener("click", async () => {
     stopRingtone()
     const phone = document.getElementById("incoming-from").textContent.split("\n").pop()
     document.getElementById("incoming-overlay").classList.remove("show")
+    pararPollSync()
+    await api.chamadas.notificar(SESSION_TOKEN, phone)
     const { call, err } = await pendingOffer.accept()
     pendingOffer = null
     if (err) { log(`Erro ao aceitar: ${err.message}`, "err"); return }
@@ -392,7 +417,7 @@ document.getElementById("btn-accept").addEventListener("click", async () => {
 // Recusar
 document.getElementById("btn-reject").addEventListener("click", async () => {
     if (!pendingOffer) return
-    stopRingtone()
+    pararPollSync(); stopRingtone()
     const phone = document.getElementById("incoming-from").textContent.split("\n").pop()
     await pendingOffer.reject(); pendingOffer = null
     document.getElementById("incoming-overlay").classList.remove("show")

@@ -76,6 +76,12 @@ async function migrate(db) {
             atendida   TINYINT(1)   DEFAULT 0
         )`)
 
+    await db.execute(`
+        CREATE TABLE IF NOT EXISTS wavoip_sync (
+            phone       VARCHAR(30) PRIMARY KEY,
+            atendida_em DATETIME DEFAULT NOW()
+        )`)
+
     // Cria admin padrão se não existir nenhum usuário
     const [[{ total }]] = await db.execute("SELECT COUNT(*) as total FROM wavoip_usuarios")
     if (total === 0) {
@@ -216,6 +222,21 @@ export async function vinculosDoUsuario(usuarioId) {
         "SELECT token_id FROM wavoip_usuario_token WHERE usuario_id=?", [usuarioId]
     )
     return rows.map(r => r.token_id)
+}
+
+// ── Sync multi-device ─────────────────────────────────────────────────────────
+export async function notificarAtendida(phone) {
+    const db = await getPool()
+    await db.execute("REPLACE INTO wavoip_sync (phone) VALUES (?)", [phone])
+    await db.execute("DELETE FROM wavoip_sync WHERE atendida_em < DATE_SUB(NOW(), INTERVAL 2 MINUTE)")
+}
+
+export async function verificarAtendida(phone) {
+    const db = await getPool()
+    const [[row]] = await db.execute(
+        "SELECT phone FROM wavoip_sync WHERE phone = ? AND atendida_em > DATE_SUB(NOW(), INTERVAL 2 MINUTE)", [phone]
+    )
+    return !!row
 }
 
 // ── Contatos ──────────────────────────────────────────────────────────────────

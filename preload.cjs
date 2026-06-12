@@ -38,6 +38,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
         desvincular: (token, uid, tid) => ipcRenderer.invoke("admin:vinculos:desvincular", token, uid, tid),
     },
 
+    // Sync multi-device
+    chamadas: {
+        notificar: (token, phone) => ipcRenderer.invoke("chamada:notificar", token, phone),
+        verificar: (token, phone) => ipcRenderer.invoke("chamada:verificar", token, phone),
+    },
+
     // Contatos
     contatos: {
         listar:    (token)                  => ipcRenderer.invoke("contatos:listar", token),
